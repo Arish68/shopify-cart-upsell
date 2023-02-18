@@ -1,0 +1,128 @@
+$.each(cart.items, function(index, product) {
+            var prodImg;
+            if (product.image !== null) {
+              prodImg = product.image.replace(/(\.[^.]*)$/, "_180x$1");
+            } else {
+              prodImg = '//cdn.shopify.com/s/assets/admin/no-image-medium-cc9732cb976dd349a0df1d39816fbcc7.gif';
+            }
+//for upsell
+            
+          var add_item_url  = product.url.split('?'); 
+          var item = len - 1;
+          if(index === 0 ){
+//         $('body .custom.with-image.multi').remove();
+          var add_item_url  = product.url.split('?');
+          var i;
+
+      jQuery.getJSON(add_item_url[0] + '.js', function(product) {
+      console.log("start upsell");
+           var upsell_data=product.description.split('||');
+           var get_upsell_length =   upsell_data.length;
+        $('.upsell_container .nudge-offer').remove()
+        if( upsell_data !=  'undefined' && upsell_data != '' ){
+         var url = upsell_data[1].replace(/(<([^>]+)>)/ig,"");
+           jQuery.getJSON(url + '.js', function(product) {
+             if(product.available){
+              var final_price =  product.price;
+              var price_dollar = parseInt(final_price) / 100.0;
+              var images = product.images;
+              var desc = product.description;
+              var images = product.images;
+              var variants = product.variants;
+              var options = product.options;
+//            console.log(price_dollar);
+             $('.upsell_container').prepend(`<div class="nudge-offer" class="custom with-image  multi stack accordionmobilefix">
+             <span class="hide_upsell" >×</span> <div class="offer-text">Would you like to<br> add matching Pairs?</div>
+                <div class="offer-collection"> 
+                <div class="product-wrapper"> <div class="product-image-wrapper"> 
+<a href="${url}"> <img src="${product.images[0]}" class="product-image_upsell medium"> </a>
+                </div> <div class="details">
+                <div class="product-title-wrapper"> 
+              <a href="${url}">  <span class="product-title">${ product.title} </span> </a>
+                <span class="product-price-wrapper money">$${price_dollar}</span> </div> 
+<div  class="AddToCartForm_upsell-${i}" > 
+               </div>
+               </div> 
+                </div>
+                </div>
+                </div>`);
+             if(variants.length > 1){
+               $('.AddToCartForm_upsell-'+i).prepend('<label>Size</label><span id="product-select"></span>'); 
+                         $(variants).each(function (i, variant) {
+//            console.log(variant)
+          var variant_id = variant.id;
+          var variant_title = variant.title;
+           if (variant.available) {
+            $('#product-select').append('<span id="'+variant_id+'" value="' + variant_title + '">' + variant_title + '</span>');
+           } 
+          });
+               
+            }
+                //               var variant_first_id =   ;
+//              console.log(variant_first_id);
+
+        
+
+             }
+           });
+             
+        }
+
+        
+        
+        
+        
+    } );
+//   }
+   
+  }else{
+//       console.log(index+'else'+item)
+      
+      }
+            
+            
+//             for upsell
+            
+            
+            
+            if (product.properties !== null) {
+              $.each(product.properties, function(key, value) {
+                if (key.charAt(0) === '_' || !value) {
+                   delete product.properties[key];
+                 }
+              });
+            }
+  
+            // If we have line-item discount, add formattedAmount to discount object
+            var amount = 0;
+            if (product.line_level_discount_allocations.length !== 0) {
+              for (var discount in product.line_level_discount_allocations) {
+                amount = product.line_level_discount_allocations[discount].amount;
+  
+                product.line_level_discount_allocations[discount].formattedAmount = theme.Currency.formatMoney(amount, theme.settings.moneyFormat);
+              }
+            }
+  
+            animation_row+=2;
+  
+            item = {
+              key: product.key,
+              url: product.url,
+              img: prodImg,
+              animationRow: animation_row,
+              name: product.product_title,
+              variation: product.variant_title,
+              properties: product.properties,
+              itemQty: product.quantity,
+              price: theme.Currency.formatMoney(product.price, theme.settings.moneyFormat),
+              unitPrice: theme.Currency.formatMoney(product.unit_price, theme.settings.moneyFormat),
+              unitBase: theme.Currency.getBaseUnit(product),
+              discountedPrice: theme.Currency.formatMoney((product.price - (product.total_discount/product.quantity)), theme.settings.moneyFormat),
+              discounts: product.line_level_discount_allocations,
+              discountsApplied: product.line_level_discount_allocations.length === 0 ? false : true,
+              vendor: product.vendor
+            };
+  
+            items.push(item);
+          });
+  
